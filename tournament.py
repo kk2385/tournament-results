@@ -6,31 +6,32 @@
 import psycopg2
 
 
-def connect():
-    """Connect to the PostgreSQL database.  Returns a database connection."""
-    return psycopg2.connect("dbname=tournament")
+def connect(database_name="tournament"):
+    try:
+        db = psycopg2.connect("dbname={}".format(database_name))
+        cursor = db.cursor()
+        return db, cursor
+    except:
+        print("<error message>")
 
 
 def deleteMatches():
     """Remove all the match records from the database."""
-    db = connect()
-    c = db.cursor()
-    c.execute("DELETE FROM matches;")
+    db, c = connect()
+    c.execute("TRUNCATE matches;")
     db.commit()
     db.close()
 
 def deletePlayers():
     """Remove all the player records from the database."""
-    db = connect()
-    c = db.cursor()
-    c.execute("DELETE FROM players;")
+    db, c = connect()
+    c.execute("TRUNCATE players CASCADE;")
     db.commit()
     db.close()
 
 def countPlayers():
     """Returns the number of players currently registered."""
-    db = connect()
-    c = db.cursor()
+    db, c = connect()
     c.execute("SELECT count(*) FROM players;")
     result = c.fetchone()[0]
     db.close()
@@ -46,8 +47,7 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
-    db = connect()
-    c = db.cursor()
+    db, c = connect()
     c.execute("INSERT INTO players (name) VALUES (%s);", (name, ))
     db.commit()
     db.close()
@@ -65,8 +65,7 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
-    db = connect()
-    c = db.cursor()
+    db, c = connect()
 
     query_string = "SELECT * from standings;"
     
@@ -84,8 +83,7 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
-    db = connect()
-    c = db.cursor()
+    db, c = connect()
 
     c.execute("INSERT INTO matches (winner, loser) VALUES (%s, %s)",
               (winner, loser,))

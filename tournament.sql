@@ -1,5 +1,7 @@
 -- Table definitions for the tournament project.
 
+DROP DATABASE IF EXISTS tournament;  -- First check if database already exists. If yes, drop it to start from scratch
+
 CREATE database tournament;
 
 \c tournament;
@@ -10,6 +12,7 @@ CREATE table players (
 );
 
 CREATE table matches (
+    id serial primary key,
     winner integer references players (id),
     loser integer references players (id)
 );
